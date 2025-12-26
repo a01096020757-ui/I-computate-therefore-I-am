@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>I Computate, Therefore I am - Blue</title>
+<style>
+  body { margin: 0; background: #0022aa; overflow: hidden; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  #bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  #stage { position: relative; width: 100vw; height: 100vh; z-index: 10; }
+  .step {
+    position: absolute; color: #ffffff; font-size: 28px; white-space: pre; letter-spacing: .05em; pointer-events: none; font-weight: bold;
+    text-shadow: 3px 3px 0px #000055; filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+  }
+  .face {
+    position: absolute; width: 280px; opacity: 0; transition: opacity 2.5s ease-in-out; 
+    filter: grayscale(100%) contrast(150%) brightness(1.2); mix-blend-mode: hard-light; 
+  }
+  .hint { position: fixed; left: 12px; bottom: 10px; color: #88ccff; font: 12px monospace; z-index: 100; }
+  /* 저작권 표시 스타일 */
+  .copyright { position: fixed; right: 12px; bottom: 10px; color: #6699ff; font: 11px monospace; z-index: 100; opacity: 0.8; }
+</style>
+</head>
+<body>
+<div id="bg-layer"></div>
+<div id="stage"></div>
+<div class="hint">click = restart · space = pause</div>
+<div class="copyright">ⓒ 2025 Sunjae Jun. All rights reserved.</div>
+
+<script>
+/**
+ * Title: I COMPUTATE, THEREFORE I AM
+ * Author: Sunjae Jun
+ * Year: 2025
+ * Description: Kinetic Typography Poem
+ * Copyright (c) 2025 Sunjae Jun. All rights reserved.
+ */
+
+const PHRASE = "I COMPUTATE, THEREFORE I AM";
+const IMG_URL = "https://upload.wikimedia.org/wikipedia/commons/7/73/Frans_Hals_-_Portret_van_Ren%C3%A9_Descartes.jpg";
+const stage = document.getElementById("stage");
+const bgLayer = document.getElementById("bg-layer");
+
+let running = true; let speed = 1.0; let stepGap = 35;       
+let currentX = window.innerWidth / 2; let xDirection = 1; let xStepSize = 45;     
+let y = window.innerHeight + 40;
+
+function addStep(text){
+  const d = document.createElement("div");
+  d.className = "step"; d.textContent = text;
+  d.style.top = y + "px"; d.style.left = currentX + "px";
+  stage.appendChild(d);
+  currentX += (xStepSize * xDirection);
+  if (currentX > window.innerWidth - 450 || currentX < 50) { xDirection *= -1; }
+}
+
+function addFace() {
+  const img = document.createElement("img");
+  img.src = IMG_URL; img.className = "face";
+  const randomX = Math.random() * (window.innerWidth - 250);
+  const randomY = Math.random() * (window.innerHeight - 250);
+  img.style.left = randomX + "px"; img.style.top = randomY + "px";
+  const rotate = (Math.random() - 0.5) * 20; 
+  img.style.transform = `rotate(${rotate}deg)`;
+  bgLayer.appendChild(img);
+  setTimeout(() => { img.style.opacity = Math.random() * 0.3 + 0.1; }, 100);
+  setTimeout(() => { img.style.opacity = 0; setTimeout(() => { img.remove(); }, 3000); }, 5000);
+}
+
+function loop(){
+  if(!running) return requestAnimationFrame(loop);
+  speed *= 1.0015; 
+  if (Math.random() < 0.10 * speed) { addStep(PHRASE); y -= stepGap; }
+  if (Math.random() < 0.04) { addFace(); }
+  const children = [...stage.children];
+  for(let el of children){
+    const ty = parseFloat(el.style.top);
+    el.style.top = (ty - speed) + "px";
+    if (ty < -50) el.remove();
+  }
+  if (y < -window.innerHeight) { reset(); }
+  requestAnimationFrame(loop);
+}
+
+function reset() {
+  y = window.innerHeight + 40; speed = 1.0; stage.innerHTML = ""; bgLayer.innerHTML = "";
+  currentX = window.innerWidth / 2; xDirection = Math.random() > 0.5 ? 1 : -1;
+}
+loop();
+window.addEventListener("click", reset);
+window.addEventListener("keydown", (e)=>{ if(e.code === "Space") running = !running; });
+window.addEventListener("resize", ()=>{ y = window.innerHeight + 40; currentX = window.innerWidth / 2; });
+</script>
+</body>
+</html>
